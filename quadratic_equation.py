@@ -1,4 +1,4 @@
-from math import sqrt
+from math import *
 a=int(input("enter coffecient a"))
 b=int(input("enter coffecient b"))
 c=int(input("enter coffecient c"))
