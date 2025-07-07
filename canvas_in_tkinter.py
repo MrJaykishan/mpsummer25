@@ -1,0 +1,16 @@
+from tkinter import *
+root=Tk()
+root.title("Canvas")
+c=Canvas(root,bg="yellow",height=400,width=500)
+c.pack()
+c.create_line(0,0,400,400,width=10,fill='red')
+# c.create_rectangle(300,300,200,100,fill="blue")
+c.create_rectangle(300,300,100,100,fill="green")
+c.create_oval(300,300,100,100,fill="red")
+c.create_arc(300,300,100,100,fill="blue",extent=120)
+points=[200,110,480,200,280,280,200,110]
+poly=c.create_polygon(points,fill='blue',outline='yellow',width=10)
+# c.create_line(50,50,300,400)
+root.geometry("600x500+200+100")
+root.resizable(0,0)
+root.mainloop()
