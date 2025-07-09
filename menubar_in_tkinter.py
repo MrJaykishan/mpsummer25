@@ -13,6 +13,13 @@ filemenu.add_command(label='Open',accelerator='Ctrl+O')
 filemenu.add_separator()
 filemenu.add_command(label='Save')
 filemenu.add_command(label='Save As')
+
+# creating submenu
+link_menu=Menu(filemenu,tearoff=0)
+link_menu.add_command(label="Lf")
+link_menu.add_command(label="CR")
+filemenu.add_cascade(label='Link Seprator',menu=link_menu)
+
 filemenu.add_command(label='Exit',command=exit)
 
 # creating Edit menu
