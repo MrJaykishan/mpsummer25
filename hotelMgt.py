@@ -32,7 +32,7 @@ def adminLogin():
         dbconfig()
         username = usernameVar.get()
         password = passwordVar.get()
-        que = "select * from login_info where username=%s and password=%s"
+        que = "select * from login_info where binary username=%s and binary password=%s"
         val = (username, password)
         mycursor.execute(que, val)
         data = mycursor.fetchall()
@@ -68,7 +68,41 @@ def additemprocess():
         mycursor.execute(queins, val)
         conn.commit()
         messagebox.showinfo('Data Saved','Data Saved Successfully')
-
+        itemnameVar.set('')
+        itemtypeVar.set('')
+        itemrateVar.set('')
+def updateItem():
+    if itemnameVar.get() == '' or itemtypeVar.get() == '' or itemrateVar.get() == '':
+        messagebox.showerror('Data Validation Error', 'Please Fill All Details of Item')
+    else:
+        name = itemnameVar.get()
+        type = itemtypeVar.get()
+        rate = itemrateVar.get()
+        dbconfig()
+        queup = "update menu_item set rate=%s, type=%s where name=%s"
+        val = (rate, type,name)
+        mycursor.execute(queup, val)
+        conn.commit()
+        messagebox.showinfo('Data Updated', 'Data Updated Successfully')
+        itemnameVar.set('')
+        itemtypeVar.set('')
+        itemrateVar.set('')
+def DeleteItem():
+    if itemnameVar.get() == '' or itemtypeVar.get() == '' or itemrateVar.get() == '':
+        messagebox.showerror('Data Validation Error', 'Please Fill All Details of Item')
+    else:
+        name = itemnameVar.get()
+        type = itemtypeVar.get()
+        rate = itemrateVar.get()
+        dbconfig()
+        queup = "delete from menu_item where name=%s"
+        val = (name)
+        mycursor.execute(queup, val)
+        conn.commit()
+        messagebox.showinfo('Data Deleted', 'Data Deleted Successfully')
+        itemnameVar.set('')
+        itemtypeVar.set('')
+        itemrateVar.set('')
 itemnameVar=StringVar()
 itemrateVar=StringVar()
 itemtypeVar=StringVar()
@@ -103,8 +137,13 @@ def addItemWindow():
     itemtypeEntry = Entry(taz, textvariable=itemtypeVar)
     itemtypeEntry.grid(row=4, column=2, padx=20, pady=5)
     # itemtypeEntry.configure(validate="key", validatecommand=(callback, "%P"))
+
+    updateButton = Button(taz, text="Update", width=20, height=2, fg="green", bd=10, command=updateItem)
+    updateButton.grid(row=5, column=0, columnspan=2, padx=20, pady=5)
     additemButton = Button(taz, text="Add Item", width=20, height=2, fg="green", bd=10, command=additemprocess)
     additemButton.grid(row=5, column=1, columnspan=2)
+    deleteButton = Button(taz, text="Update", width=20, height=2, fg="green", bd=10, command=DeleteItem)
+    deleteButton.grid(row=5, column=2, columnspan=2, padx=20, pady=5)
 
     #############################################
 def billWindow():
@@ -126,7 +165,7 @@ def loginwindow():
     usernameEntry=Entry(taz,textvariable=usernameVar)
     usernameEntry.grid(row=2,column=2,padx=20,pady=5)
 
-    passwordEntry=Entry(taz,show="?",textvariable=passwordVar)
+    passwordEntry=Entry(taz,textvariable=passwordVar)
     passwordEntry.grid(row=3, column=2, padx=20, pady=5)
 
     loginButton=Button(taz,text="Login",width=20,height=2,fg="green",bd=10,command=adminLogin)
