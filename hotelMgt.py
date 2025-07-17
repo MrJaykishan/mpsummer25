@@ -1,8 +1,9 @@
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 import pymysql
 
-from datbase_connectivity import mycursor
+
 
 taz=Tk()
 taz.title('Taz Hotel')
@@ -10,13 +11,33 @@ height=taz.winfo_screenheight()
 #print(height)
 width=taz.winfo_screenwidth()
 #print(width)
+
+### for char input
+
+def only_char_input(P):
+    if P.isalpha() or P=='':
+        return True
+    return False
+callback=taz.register(only_char_input)
+# for digit
+def only_numeric_input(P):
+    if P.isdigit() or P=='':
+        return True
+    return False
+callback2=taz.register(only_numeric_input)
+
+
+
+
+# treeview
+tazTV=ttk.Treeview(height=10,columns=('Item Name''Rate','Type'))
 def clear_screen():
     global taz
     for widgets in taz.winfo_children():
         widgets.grid_remove()
 def dbconfig():
     global conn, mycursor
-    conn=pymysql.connect(host="localhost",user="root",db="tazhotel")
+    conn=pymysql.connect(host="localhost",user="root",db="myhotel")
     mycursor=conn.cursor()
 
 def adminLogout():
@@ -63,7 +84,7 @@ def additemprocess():
         type=itemtypeVar.get()
         rate=itemrateVar.get()
         dbconfig()
-        queins = "insert into menu_item (name,rate,type) values(%s,%s,%s)"
+        queins = "insert into itemlist (item_name,item_rate,item_type) values(%s,%s,%s)"
         val = (name,rate,type)
         mycursor.execute(queins, val)
         conn.commit()
@@ -71,6 +92,7 @@ def additemprocess():
         itemnameVar.set('')
         itemtypeVar.set('')
         itemrateVar.set('')
+        getItemInTreeview()
 def updateItem():
     if itemnameVar.get() == '' or itemtypeVar.get() == '' or itemrateVar.get() == '':
         messagebox.showerror('Data Validation Error', 'Please Fill All Details of Item')
@@ -79,7 +101,7 @@ def updateItem():
         type = itemtypeVar.get()
         rate = itemrateVar.get()
         dbconfig()
-        queup = "update menu_item set rate=%s, type=%s where name=%s"
+        queup = "update itemlist set item_rate=%s, item_type=%s where item_name=%s"
         val = (rate, type,name)
         mycursor.execute(queup, val)
         conn.commit()
@@ -87,6 +109,7 @@ def updateItem():
         itemnameVar.set('')
         itemtypeVar.set('')
         itemrateVar.set('')
+        getItemInTreeview()
 def DeleteItem():
     if itemnameVar.get() == '' or itemtypeVar.get() == '' or itemrateVar.get() == '':
         messagebox.showerror('Data Validation Error', 'Please Fill All Details of Item')
@@ -95,7 +118,7 @@ def DeleteItem():
         type = itemtypeVar.get()
         rate = itemrateVar.get()
         dbconfig()
-        queup = "delete from menu_item where name=%s"
+        queup = "delete from itemlist where item_name=%s"
         val = (name)
         mycursor.execute(queup, val)
         conn.commit()
@@ -103,6 +126,40 @@ def DeleteItem():
         itemnameVar.set('')
         itemtypeVar.set('')
         itemrateVar.set('')
+########## double click ##########
+
+def OnDoubleClick(event):
+    item=tazTV.selection()
+    itemNameVar1=tazTV.item(item,"text")
+    item_detail = tazTV.item(item, "values")
+    # print(itemNameVar1)
+    # print(item_detail)
+    itemnameVar.set(itemNameVar1)
+    itemrateVar.set(item_detail[0])
+    itemtypeVar.set(item_detail[1])
+
+####################################333
+def getItemInTreeview():
+    # to delete already inserted data
+    records=tazTV.get_children()
+    for x in records:
+        tazTV.delete(x)
+    conn=pymysql.connect(host="localhost",user="root",db="myhotel")
+    mycursor=conn.cursor(pymysql.cursors.DictCursor)
+    query1="select * from itemlist"
+    mycursor.execute(query1)
+    data=mycursor.fetchall()
+    # print(data)
+    for row in data:
+        tazTV.insert('','end',text=row['item_name'],values=(row["item_rate"],row['item_type']))
+    conn.close()
+    tazTV.bind("<Double-1>",OnDoubleClick)
+
+
+###################################3
+
+
+
 itemnameVar=StringVar()
 itemrateVar=StringVar()
 itemtypeVar=StringVar()
@@ -127,12 +184,12 @@ def addItemWindow():
 
     itemnameEntry = Entry(taz, textvariable=itemnameVar)
     itemnameEntry.grid(row=2, column=2, padx=20, pady=5)
-    # for validation
-    # itemnameEntry.configure(validate="key", validatecommand=(callback, "%P"))
+    #for validation
+    itemnameEntry.configure(validate="key", validatecommand=(callback, "%P"))
 
     itemrateEntry = Entry(taz, textvariable=itemrateVar)
     itemrateEntry.grid(row=3, column=2, padx=20, pady=5)
-    # itemrateEntry.configure(validate="key", validatecommand=(callback2, "%P"))
+    itemrateEntry.configure(validate="key", validatecommand=(callback2, "%P"))
 
     itemtypeEntry = Entry(taz, textvariable=itemtypeVar)
     itemtypeEntry.grid(row=4, column=2, padx=20, pady=5)
@@ -144,7 +201,21 @@ def addItemWindow():
     additemButton.grid(row=5, column=1, columnspan=2)
     deleteButton = Button(taz, text="Update", width=20, height=2, fg="green", bd=10, command=DeleteItem)
     deleteButton.grid(row=5, column=2, columnspan=2, padx=20, pady=5)
+    #######################
+    # treeview
+    tazTV.grid(row=8, column=0, columnspan=3)
+    style = ttk.Style(taz)
+    style.theme_use('clam')
+    style.configure("Treeview", fieldbackground="red")
+    scrollBar = Scrollbar(taz, orient="vertical", command=tazTV.yview)
+    scrollBar.grid(row=8, column=2, sticky="NSE")
 
+    tazTV.configure(yscrollcommand=scrollBar.set)
+    tazTV.heading('#0', text="Item Name")
+    tazTV.heading('#1', text="Rate")
+    tazTV.heading('#2', text="Type")
+
+    getItemInTreeview()
     #############################################
 def billWindow():
     pass
